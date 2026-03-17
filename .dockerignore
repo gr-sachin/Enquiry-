@@ -6,3 +6,6 @@ node_modules
 Dockerfile
 kubernetes
 k8s
+npm-debug.log
+README.md
+.gitignore
