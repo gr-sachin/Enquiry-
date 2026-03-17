@@ -1,0 +1,264 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | KNITWAY INDIA PVT LTD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-container {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8b5cf6, var(--primary-color));
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-logo {
+            width: 50px;
+            height: 50px;
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .auth-header h1 {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .auth-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .auth-form .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .auth-form label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .auth-form .input-icon-wrapper {
+            position: relative;
+        }
+
+        .auth-form .input-icon-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .auth-form .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.8rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .auth-form .form-control:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .auth-form .form-control::placeholder {
+            color: #475569;
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(to right, #8b5cf6, var(--primary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-auth:active {
+            transform: translateY(0);
+        }
+
+        .auth-footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .auth-footer a {
+            color: #8b5cf6;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .auth-footer a:hover {
+            color: #a78bfa;
+        }
+
+        /* Ambient background blobs matching the dashboard feel */
+        .ambient-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+        .blob-1 { background: #8b5cf6; width: 300px; height: 300px; top: -100px; left: -100px; }
+        .blob-2 { background: #3b82f6; width: 250px; height: 250px; bottom: -50px; right: -100px; }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2"></div>
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="ri-user-add-line"></i>
+            </div>
+            <h1>Create an Account</h1>
+            <p>Set up your owner profile to manage enquiries</p>
+        </div>
+
+        <form class="auth-form" action="home.html" method="GET">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <div class="input-icon-wrapper">
+                        <i class="ri-user-line"></i>
+                        <input type="text" id="firstName" class="form-control" placeholder="John" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <div class="input-icon-wrapper">
+                        <i class="ri-user-line"></i>
+                        <input type="text" id="lastName" class="form-control" placeholder="Doe" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-icon-wrapper">
+                    <i class="ri-mail-line"></i>
+                    <input type="email" id="email" class="form-control" placeholder="john.doe@knitway.in" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-icon-wrapper">
+                        <i class="ri-lock-line"></i>
+                        <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="input-icon-wrapper">
+                        <i class="ri-lock-password-line"></i>
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-auth">
+                Create Account <i class="ri-arrow-right-line"></i>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="login.html">Log In</a>
+        </div>
+    </div>
+
+</body>
+</html>

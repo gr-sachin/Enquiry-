@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Pending Quotes | Knitway India Pvt Ltd</title>
+    <!-- Fonts and Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+            margin-bottom: 1.5rem;
+        }
+        .back-btn:hover { color: var(--text-primary); }
+    </style>
+</head>
+<body>
+    
+      <nav class="navbar" style="position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 2rem; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+          <div class="brand" style="display: flex; align-items: center; gap: 1rem; font-weight: 700; color: var(--primary-accent); letter-spacing: 0.5px; font-size: 1.1rem;">
+              <div class="brand-icon" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: transparent; width: 32px; height: 32px;">
+                  <img src="/logo.png" alt="Knitway Logo" style="width: 100%; height: 100%; object-fit: contain;" />
+              </div>
+              KNITWAY INDIA PVT LTD
+          </div>
+          <div class="nav-status-links" style="display: flex; align-items: center; gap: 0.75rem;">
+              <a href="project-confirmed.html" class="nav-status-btn">Confirmed</a>
+              <a href="project-postponed.html" class="nav-status-btn">Postponed</a>
+              <a href="project-drop.html" class="nav-status-btn">Dropped</a>
+              <a href="order-lost.html" class="nav-status-btn">Order Lost</a>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1.5rem;">
+               <!-- Home Button -->
+               <a href="/" class="notification-icon" title="Home" style="color: var(--text-secondary); font-size: 1.25rem; transition: all 0.2s; position: relative; text-decoration: none;">
+                   <i class="ri-home-4-line"></i>
+               </a>
+               <!-- Notification Button -->
+               <a href="pending-quotes.html" class="notification-icon" title="Pending Quotations" style="color: var(--text-secondary); font-size: 1.25rem; transition: all 0.2s; position: relative; text-decoration: none;">
+                   <i class="ri-notification-3-line"></i>
+                   <span class="notification-badge" id="nav-notification-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.7rem; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid #0f172a;">0</span>
+               </a>
+               <div class="user-profile" style="display: flex; align-items: center; gap: 1rem;">
+                   <div style="display: flex; align-items: center; gap: 0.75rem;">
+                       <div style="text-align: right;">
+                           <strong id="user-display-name" style="display:block; font-size:0.9rem;">Owner Dashboard</strong>
+                           <span id="user-display-role" style="font-size:0.8rem; color:var(--text-secondary);">Administration</span>
+                       </div>
+                       <img id="user-display-avatar" src="https://ui-avatars.com/api/?name=Owner&background=3b82f6&color=fff&bold=true" alt="Owner" style="width:40px; border-radius:50%; box-shadow: 0 0 10px rgba(59,130,246,0.3);">
+                   </div>
+                   <!-- Logout Link -->
+                   <a href="#" onclick="handleLogout(event)" class="nav-btn logout-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.8rem; border-radius: 6px; background: rgba(239,68,68,0.1); color: #ef4444; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; border: 1px solid rgba(239,68,68,0.2);">
+                       <i class="ri-logout-circle-r-line"></i> Sign Out
+                   </a>
+               </div>
+          </div>
+      </nav>
+
+
+    <main class="main-container">
+        <a href="/" class="back-btn"><i class="ri-arrow-left-line"></i> Back to Dashboard</a>
+        <div class="header-actions">
+            <div>
+                <h1>Pending Quotes</h1>
+                <p style="color:var(--text-secondary); margin-top:0.4rem;">Enquiries currently awaiting quotation fulfillment.</p>
+            </div>
+            <button class="btn-primary" id="btn-new-dummy" style="display:none">
+                <i class="ri-add-line"></i> New Enquiry
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="25%">Customer Details</th>
+                        <th width="30%">Types of Machines</th>
+                        <th width="20%">Quotation Issue</th>
+                        <th width="15%">Revised Quote</th>
+                        <th width="10%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="enquiry-body">
+                    <!-- Dynamic filtered content -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal Form overlay -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="font-size:1.4rem;">Add New Enquiry</h2>
+                <button class="close-btn" id="btn-close"><i class="ri-close-line"></i></button>
+            </div>
+            <form id="enquiry-form">
+                <div class="form-group">
+                    <label>Client / Company Name</label>
+                    <input type="text" id="clientName" class="form-control" placeholder="e.g. Aura Textiles" required>
+                </div>
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <input type="text" id="customerName" class="form-control" placeholder="e.g. Ramesh Kumar" required>
+                </div>
+                <div class="form-group">
+                    <label>Contact Details (Phone/Email)</label>
+                    <input type="text" id="contact" class="form-control" placeholder="+91 XXXX XXXXX" required>
+                </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" class="form-control" placeholder="e.g. client@example.com">
+                    </div>
+
+                <div class="form-group">
+                    <label>Types of Machines Requested</label>
+                    <input type="text" id="machineTypes" class="form-control" placeholder="e.g. Circular Knitting, Flat Knitting">
+                </div>
+                <div class="form-group" style="margin-top: 1.5rem; border: 1px solid rgba(255,255,255,0.05); padding: 1.25rem; border-radius: 12px; background: rgba(255,255,255,0.02);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <label style="margin-bottom: 0; font-weight: 700; color: var(--text-primary); font-size: 1rem;">Machine Configurations</label>
+                        <button type="button" id="add-spec-btn" class="nav-btn" title="Add Machine Configuration" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--primary-accent); color: white; border: none; cursor: pointer; transition: transform 0.2s;">
+                            <i class="ri-add-line" style="font-size: 1.2rem;"></i>
+                        </button>
+                    </div>
+                                        <div id="specs-header" style="display: grid; grid-template-columns: 2.5fr 1fr 1fr 1fr 0.8fr 32px; gap: 0.5rem; margin-bottom: 0.5rem; padding: 0 0.75rem; color: var(--text-secondary); font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">
+                        <div>Model</div>
+                        <div>Dia</div>
+                        <div>Gauge</div>
+                        <div>Feeders</div>
+                        <div>Qty</div>
+                        <div></div>
+                    </div>
+                    <div id="specs-container">
+                        <!-- Dynamic configuration boxes will be added here -->
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label>Project Status</label><select id="projectStatus" class="form-control form-select"><option value="Active">Active</option><option value="Confirmed">Confirmed</option><option value="Postponed">Postponed</option><option value="Dropped">Dropped</option><option value="Lost">Lost</option></select></div><div class="form-group"><label>Quotation Status</label>
+                        <select id="quoteStatus" class="form-control form-select">
+                            <option value="Pending" selected>Pending</option>
+                            <option value="Issued">Issued</option>
+                        </select>
+                    </div>
+                                        <div class="form-group" id="quoteDateGroup">
+                        <label>Expected / Follow-up Date</label>
+                        <input type="date" id="quoteDate" class="form-control">
+                    </div>
+<div class="form-group">
+                        <label>Revised Quote</label>
+                        <input type="text" id="revisedQuote" class="form-control" placeholder="e.g. â‚¹15,00,000 (Optional)">
+                    </div>
+                </div>
+                <div class="form-group" id="transferredToGroup" style="display: none; margin-top:1rem;">
+                    <label>Transferred To (If Lost)</label>
+                    <input type="text" id="transferredTo" class="form-control" placeholder="e.g. Competitor Name">
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%; justify-content:center; margin-top:1rem;">
+                    Save Enquiry
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- Notes Modal -->
+    <div class="modal-overlay" id="notes-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="font-size:1.4rem;">Enquiry Notes</h2>
+                <button class="close-btn" id="notes-btn-close"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="notes-textarea" class="form-control" rows="10" placeholder="Write your notes here..." style="resize: vertical; min-height: 200px; background: rgba(15, 23, 42, 0.5); color: white; border: 1px solid var(--border-color); width: 100%; border-radius: 8px; padding: 1rem; font-family: inherit;"></textarea>
+            </div>
+            <button type="button" class="btn-primary" id="btn-save-notes" style="width:100%; justify-content:center; margin-top:1rem;">
+                Save Notes
+            </button>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
