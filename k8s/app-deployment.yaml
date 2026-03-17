@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: enquiry-app
-        image: enquiry-app:latest
-        imagePullPolicy: IfNotPresent
+        image: ${IMAGE_NAME}
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: 100m

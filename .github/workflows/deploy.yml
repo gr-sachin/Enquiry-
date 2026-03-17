@@ -9,42 +9,102 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Copy project files to EC2
-        uses: appleboy/scp-action@v0.1.7
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "."
-          target: "~/enquiry-app"
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: MONGODB_URI
+          envs: MONGODB_URI,IMAGE_NAME
+          script: |
+            # Pull the image to ensure it's available (if private, login is needed)
+            # For public ghcr images, no login is needed for pulling usually.
+            # If private, run: echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            cd ~/enquiry-app || mkdir -p ~/enquiry-app && cd ~/enquiry-app
+            
+            # Since files are not copied in this new flow (they are in the image), 
+            # we only need the k8s manifests. Let's assume they are already there or 
+            # better yet, we should copy them.
+            
+      - name: Copy k8s manifests to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "k8s/*"
+          target: "~/enquiry-app"
+
+      - name: Finalize k3s Deployment
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: MONGODB_URI,IMAGE_NAME
           script: |
             cd ~/enquiry-app
             
-            # Build the Docker image natively on the machine
-            sudo docker build --build-arg MONGODB_URI="$MONGODB_URI" -t enquiry-app:latest .
+            # Substitute variables and apply manifests using k3s
+            export MONGODB_URI="$MONGODB_URI"
+            export IMAGE_NAME="$IMAGE_NAME"
             
-            # Apply Kubernetes manifests, substituting secrets into app-deployment.yaml
-            envsubst < k8s/app-deployment.yaml > k8s/app-deployment.yaml.tmp
-            mv k8s/app-deployment.yaml.tmp k8s/app-deployment.yaml
+            # Use envsubst to process the deployment file
+            envsubst < k8s/app-deployment.yaml > k8s/app-deployment-final.yaml
             
-            sudo kubectl apply -f k8s/
+            sudo k3s kubectl apply -f k8s/grafana-configs.yaml
+            sudo k3s kubectl apply -f k8s/grafana.yaml
+            sudo k3s kubectl apply -f k8s/prometheus-deployment.yaml
+            sudo k3s kubectl apply -f k8s/ingress.yaml
+            sudo k3s kubectl apply -f k8s/app-deployment-final.yaml
             
-            # Rollout restart the deployment to pick up the newly built image
-            sudo kubectl rollout restart deployment enquiry-app
+            # Restart deployment to ensure new image is pulled
+            sudo k3s kubectl rollout restart deployment enquiry-app
             
             # Verify Status
-            sudo kubectl get pods
+            sudo k3s kubectl get pods
