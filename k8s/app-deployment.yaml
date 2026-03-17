@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enquiry-app
+  labels:
+    app: enquiry-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: enquiry-app
+  template:
+    metadata:
+      labels:
+        app: enquiry-app
+    spec:
+      containers:
+      - name: enquiry-app
+        image: enquiry-app:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        ports:
+        - containerPort: 3000
+        env:
+        # Use MongoDB Cloud provided by workflow
+        - name: MONGODB_URI
+          value: "${MONGODB_URI}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enquiry-app-service
+spec:
+  selector:
+    app: enquiry-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000

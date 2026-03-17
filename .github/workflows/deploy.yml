@@ -1,0 +1,50 @@
+name: Deploy to EC2 instance
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy project files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "."
+          target: "~/enquiry-app"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: MONGODB_URI
+          script: |
+            cd ~/enquiry-app
+            
+            # Build the Docker image natively on the machine
+            sudo docker build --build-arg MONGODB_URI="$MONGODB_URI" -t enquiry-app:latest .
+            
+            # Apply Kubernetes manifests, substituting secrets into app-deployment.yaml
+            envsubst < k8s/app-deployment.yaml > k8s/app-deployment.yaml.tmp
+            mv k8s/app-deployment.yaml.tmp k8s/app-deployment.yaml
+            
+            sudo kubectl apply -f k8s/
+            
+            # Rollout restart the deployment to pick up the newly built image
+            sudo kubectl rollout restart deployment enquiry-app
+            
+            # Verify Status
+            sudo kubectl get pods
