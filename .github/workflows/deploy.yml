@@ -6,16 +6,14 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       packages: write
-
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
+      IMAGE_NAME: enquiry-app # Fixed: must not end with a hyphen
 
     steps:
       - name: Checkout repository
@@ -32,7 +30,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha,format=long
             type=raw,value=latest
@@ -47,27 +45,17 @@ jobs:
           build-args: |
             MONGODB_URI=${{ secrets.MONGODB_URI }}
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        env:
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs: MONGODB_URI,IMAGE_NAME
-          script: |
-            # Pull the image to ensure it's available (if private, login is needed)
-            # For public ghcr images, no login is needed for pulling usually.
-            # If private, run: echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
-            cd ~/enquiry-app || mkdir -p ~/enquiry-app && cd ~/enquiry-app
-            
-            # Since files are not copied in this new flow (they are in the image), 
-            # we only need the k8s manifests. Let's assume they are already there or 
-            # better yet, we should copy them.
-            
+  deploy-to-ec2:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: enquiry-app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Copy k8s manifests to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -81,18 +69,18 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          IMAGE_PATH: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: MONGODB_URI,IMAGE_NAME
+          envs: MONGODB_URI,IMAGE_PATH
           script: |
             cd ~/enquiry-app
             
             # Substitute variables and apply manifests using k3s
             export MONGODB_URI="$MONGODB_URI"
-            export IMAGE_NAME="$IMAGE_NAME"
+            export IMAGE_NAME="$IMAGE_PATH"
             
             # Use envsubst to process the deployment file
             envsubst < k8s/app-deployment.yaml > k8s/app-deployment-final.yaml
