@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { decrypt } from '@/lib/session';
 
 // Define which routes are public and don't require authentication
-const publicRoutes = ['/login', '/signup', '/api/auth/login', '/api/auth/signup'];
+const publicRoutes = ['/login', '/signup', '/api/auth/login', '/api/auth/signup', '/logo.png'];
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -28,5 +28,5 @@ export async function middleware(request: NextRequest) {
 
 // Ensure the middleware runs on all paths except static files/images/api non-auth routes
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|logo.png).*)'],
 };

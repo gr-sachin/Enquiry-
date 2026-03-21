@@ -24,6 +24,11 @@ async function connectToDatabase() {
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
       return mongoose;
+    }).catch((error) => {
+      if (error.message.toLowerCase().includes('authentication failed') || error.message.toLowerCase().includes('bad auth')) {
+        throw new Error('Database authentication failed. Please verify your MongoDB credentials in .env.local.');
+      }
+      throw error;
     });
   }
   cached.conn = await cached.promise;
