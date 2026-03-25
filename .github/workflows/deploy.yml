@@ -13,7 +13,7 @@ jobs:
       packages: write
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: enquiry-app # Fixed: must not end with a hyphen
+      IMAGE_NAME: enquiry-app
 
     steps:
       - name: Checkout repository
@@ -69,30 +69,38 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
           IMAGE_PATH: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: MONGODB_URI,IMAGE_PATH
+          envs: MONGODB_URI,JWT_SECRET,IMAGE_PATH
           script: |
             cd ~/enquiry-app
-            
-            # Substitute variables and apply manifests using k3s
-            export MONGODB_URI="$MONGODB_URI"
+
+            # Create or update the Kubernetes Secret with both credentials
+            sudo k3s kubectl create secret generic enquiry-app-secret \
+              --from-literal=MONGODB_URI="$MONGODB_URI" \
+              --from-literal=JWT_SECRET="$JWT_SECRET" \
+              --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+
+            # Set the fully-qualified image path for envsubst
             export IMAGE_NAME="$IMAGE_PATH"
-            
-            # Use envsubst to process the deployment file
+
+            # Substitute IMAGE_NAME into deployment manifest and apply it
             envsubst < k8s/app-deployment.yaml > k8s/app-deployment-final.yaml
-            
+
             sudo k3s kubectl apply -f k8s/grafana-configs.yaml
             sudo k3s kubectl apply -f k8s/grafana.yaml
             sudo k3s kubectl apply -f k8s/prometheus-deployment.yaml
             sudo k3s kubectl apply -f k8s/ingress.yaml
             sudo k3s kubectl apply -f k8s/app-deployment-final.yaml
-            
+
             # Restart deployment to ensure new image is pulled
             sudo k3s kubectl rollout restart deployment enquiry-app
-            
-            # Verify Status
+
+            # Wait for rollout and verify status
+            sudo k3s kubectl rollout status deployment enquiry-app --timeout=120s
             sudo k3s kubectl get pods
+            sudo k3s kubectl get secret enquiry-app-secret

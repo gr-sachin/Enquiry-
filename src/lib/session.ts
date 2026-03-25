@@ -1,7 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const secretKey = process.env.JWT_SECRET || 'knitway-secure-fallback-secret-123';
+const secretKey = process.env.JWT_SECRET;
+if (!secretKey) {
+  throw new Error('JWT_SECRET environment variable is not set. Please define it in .env.local (dev) or as a Kubernetes Secret (production).');
+}
 const key = new TextEncoder().encode(secretKey);
 
 export async function encrypt(payload: any) {
