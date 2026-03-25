@@ -168,8 +168,8 @@ export default function Home() {
                               <i className="ri-add-line"></i> Add Machine
                           </button>
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '24px 2fr 1fr 1fr 1fr 0.8fr 32px', gap: '0.5rem', padding: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 700, text_transform: 'uppercase', borderBottom: '1px solid var(--border-color)', marginBottom: '0.5rem' } as any}>
-                          <div>#</div><div>Model</div><div>Dia</div><div>Gauge</div><div>Feeders</div><div>Qty</div><div></div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr 0.8fr 32px', gap: '0.5rem', padding: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', borderBottom: '1px solid var(--border-color)', marginBottom: '0.5rem' } as any}>
+                          <div>Model</div><div>Dia</div><div>Gauge</div><div>Feeders</div><div>Qty</div><div></div>
                       </div>
                       <div id="specs-container">
                           {/* Dynamic configuration boxes will be added here by script.js */}
